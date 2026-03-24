@@ -33,7 +33,7 @@ export class JabfyTTS {
   /** Generate audio for a complete text string. */
   async synthesize(text: string, options: TTSOptions = {}) {
     return this.model.generate(text, {
-      voice: options.voice ?? DEFAULT_VOICE,
+      voice: (options.voice ?? DEFAULT_VOICE) as any,
     });
   }
 
@@ -54,7 +54,7 @@ export class JabfyTTS {
   } {
     const splitter = new TextSplitterStream();
     const rawStream = this.model.stream(splitter, {
-      voice: options.voice ?? DEFAULT_VOICE,
+      voice: (options.voice ?? DEFAULT_VOICE) as any,
     });
 
     return {
