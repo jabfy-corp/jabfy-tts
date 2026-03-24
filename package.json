@@ -1,0 +1,33 @@
+{
+  "name": "@jabfy/tts",
+  "version": "0.1.0",
+  "description": "Kokoro TTS package for jabfy-core — converts Ollama AI text output to speech",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": ["tts", "kokoro", "speech", "ollama", "jabfy"],
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "dependencies": {
+    "kokoro-js": "^1.2.1"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  }
+}
