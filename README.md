@@ -1,4 +1,4 @@
-# @jabfy/tts
+# @jabfy-corp/tts
 
 Kokoro TTS wrapper for jabfy-core. Converts Ollama AI text output to speech using the [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) model — 82M params, runs fully locally, no API key needed.
 
@@ -8,7 +8,7 @@ Kokoro TTS wrapper for jabfy-core. Converts Ollama AI text output to speech usin
 # Authenticate with GitHub Packages first (once)
 npm login --registry=https://npm.pkg.github.com
 
-npm install @jabfy/tts
+npm install @jabfy-corp/tts
 ```
 
 ## Usage
@@ -16,7 +16,7 @@ npm install @jabfy/tts
 ### One-shot synthesis
 
 ```ts
-import { JabfyTTS } from "@jabfy/tts";
+import { JabfyTTS } from "@jabfy-corp/tts";
 
 const tts = await JabfyTTS.create();
 const audio = await tts.synthesize("Hello from jabfy!");
@@ -26,7 +26,7 @@ audio.save("output.wav");
 ### Streaming (for Ollama token-by-token output)
 
 ```ts
-import { JabfyTTS } from "@jabfy/tts";
+import { JabfyTTS } from "@jabfy-corp/tts";
 
 const tts = await JabfyTTS.create({ voice: "af_bella" });
 const stream = tts.stream();

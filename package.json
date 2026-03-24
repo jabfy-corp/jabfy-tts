@@ -1,5 +1,5 @@
 {
-  "name": "@jabfy/tts",
+  "name": "@jabfy-corp/tts",
   "version": "0.1.0",
   "description": "Kokoro TTS package for jabfy-core — converts Ollama AI text output to speech",
   "main": "dist/index.js",
@@ -21,7 +21,8 @@
   "keywords": ["tts", "kokoro", "speech", "ollama", "jabfy"],
   "license": "MIT",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
+    "registry": "https://npm.pkg.github.com/",
+    "access": "public"
   },
   "dependencies": {
     "kokoro-js": "^1.2.1"
