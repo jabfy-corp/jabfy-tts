@@ -1,10 +1,5 @@
 /** Available Kokoro voice IDs */
-export type Voice =
-  | "af_heart" | "af_bella" | "af_nicole" | "af_sarah" | "af_sky"
-  | "am_adam" | "am_michael" | "am_puck" | "am_fenrir"
-  | "bf_emma" | "bf_isabella"
-  | "bm_george" | "bm_fable" | "bm_lewis"
-  | (string & {}); // allow custom voices
+export type Voice = string;
 
 export interface TTSOptions {
   /** Kokoro voice ID. Defaults to "af_heart" */

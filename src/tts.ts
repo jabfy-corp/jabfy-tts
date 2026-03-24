@@ -66,7 +66,7 @@ export class JabfyTTS {
   }
 
   /** List all available voices. */
-  listVoices(): string[] {
-    return this.model.list_voices();
+  listVoices(): void {
+    this.model.list_voices();
   }
 }
