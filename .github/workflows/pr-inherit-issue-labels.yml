@@ -1,0 +1,62 @@
+name: Inherit Labels from Linked Issues
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  inherit-labels:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: read
+
+    steps:
+      - name: Copy labels from closed issues to PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || "";
+            const prNumber = context.payload.pull_request.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Match all closing keywords: closes/fixes/resolves #N
+            const closingPattern = /(?:closes?|fixes?|resolves?)\s+#(\d+)/gi;
+            const issueNumbers = [...body.matchAll(closingPattern)].map(m => parseInt(m[1]));
+
+            if (issueNumbers.length === 0) {
+              console.log("No linked issues found via closing keywords.");
+              return;
+            }
+
+            console.log("Linked issue(s):", issueNumbers);
+
+            // Collect all labels from every linked issue
+            const labelsToAdd = new Set();
+            for (const issueNum of issueNumbers) {
+              try {
+                const { data: issue } = await github.rest.issues.get({
+                  owner,
+                  repo,
+                  issue_number: issueNum,
+                });
+                issue.labels.forEach(l => labelsToAdd.add(l.name));
+                console.log(`Issue #${issueNum} labels:`, issue.labels.map(l => l.name));
+              } catch (e) {
+                console.warn(`Could not fetch issue #${issueNum}: ${e.message}`);
+              }
+            }
+
+            if (labelsToAdd.size === 0) {
+              console.log("No labels found on linked issues, nothing to apply.");
+              return;
+            }
+
+            console.log("Applying labels to PR #" + prNumber + ":", [...labelsToAdd]);
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: prNumber,
+              labels: [...labelsToAdd],
+            });
