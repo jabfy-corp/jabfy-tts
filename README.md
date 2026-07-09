@@ -61,6 +61,20 @@ await audioConsumer;
 
 Call `tts.listVoices()` to print all available voice IDs.
 
+## Testing / Speak Test Inputs
+
+The `speak` script quickly validates the build and synthesizes speech from test inputs:
+
+```bash
+# Speak default test phrases
+npm run speak
+
+# Speak custom text
+npm run speak -- "Hello from jabfy text to speech"
+```
+
+Audio files are written to `output/test-*.wav` and played automatically (Windows: `start`, macOS: `afplay`, Linux: `aplay`/`paplay`).
+
 ## API
 
 ### `JabfyTTS.create(options?)`
