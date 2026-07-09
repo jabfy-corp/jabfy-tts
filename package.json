@@ -16,7 +16,8 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "speak": "npm run build && node examples/speak-test.mjs"
   },
   "keywords": ["tts", "kokoro", "speech", "ollama", "jabfy"],
   "license": "MIT",
@@ -25,10 +26,16 @@
     "access": "public"
   },
   "dependencies": {
-    "kokoro-js": "^1.2.1"
+    "kokoro-js": "1.2.0"
   },
   "devDependencies": {
     "tsup": "^8.0.0",
     "typescript": "^5.4.0"
+  },
+  "overrides": {
+    "onnxruntime-node": "1.10.0",
+    "@huggingface/transformers": {
+      "onnxruntime-node": "1.10.0"
+    }
   }
 }
