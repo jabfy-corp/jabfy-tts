@@ -1,95 +1,102 @@
-# @jabfy-corp/tts
+# jabfy-tts
 
-Kokoro TTS wrapper for jabfy-core. Converts Ollama AI text output to speech using the [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) model — 82M parameters, runs fully locally, no API key needed.
+Kokoro TTS crate for jabfy-core. Converts Ollama AI text output to speech using [kokoroxide](https://crates.io/crates/kokoroxide), a Rust implementation of Kokoro TTS — runs fully locally, no API key needed.
 
 ## Install
 
-Add the registry to your `.npmrc`:
+Add to your `Cargo.toml`:
 
-```
-@jabfy-corp:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
+```toml
+[dependencies]
+jabfy-tts = "0.1"
 ```
 
-Then install:
+### Prerequisites
 
-```bash
-npm install @jabfy-corp/tts
-```
+- `espeak-ng` (used by kokoroxide for text-to-phoneme conversion) — see [kokoroxide's system requirements](https://docs.rs/kokoroxide) for platform-specific install instructions.
+- Kokoro model assets, downloaded separately (not bundled): the ONNX model, `tokenizer.json`, and a voice style `.bin` file from [Kokoro-82M-v1.0-ONNX](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX).
+
+### Windows notes
+
+The official `espeak-ng` Windows installer (`winget install eSpeak-NG.eSpeak-NG`) ships `libespeak-ng.dll` but no MSVC import library, and kokoroxide's build script only wires up linking for macOS/Linux. This repo includes a pre-generated `vendor/espeak-ng/espeak-ng.lib` (built from that DLL's exports via `dumpbin`/`lib.exe`) and a [.cargo/config.toml](.cargo/config.toml) that adds it to the linker search path. Make sure `espeak-ng`'s install directory (e.g. `C:\Program Files\eSpeak NG`) is on `PATH` at runtime so `libespeak-ng.dll` can be found.
 
 ## Usage
 
 ### One-shot synthesis
 
-```typescript
-import { JabfyTTS } from "@jabfy-corp/tts";
+```rust
+use jabfy_tts::{JabfyTts, TtsAssets, TtsOptions};
 
-const tts = await JabfyTTS.create();
-const audio = await tts.synthesize("Hello from jabfy!");
-audio.save("output.wav");
+let assets = TtsAssets::new("model.onnx", "tokenizer.json", "af_heart.bin");
+let mut tts = JabfyTts::create(&assets)?;
+
+let audio = tts.synthesize("Hello from jabfy!", TtsOptions::default())?;
+audio.save_to_wav("output.wav")?;
 ```
 
 ### Streaming (for Ollama token-by-token output)
 
-```typescript
-import { JabfyTTS } from "@jabfy-corp/tts";
+kokoroxide has no built-in incremental API, so `JabfyTts::stream` buffers
+pushed tokens and synthesizes audio once a sentence boundary (`.`, `!`, `?`,
+or newline) is seen.
 
-const tts = await JabfyTTS.create({ voice: "af_bella" });
-const stream = tts.stream();
+```rust
+use jabfy_tts::{JabfyTts, TtsAssets, TtsOptions};
 
-// Consume audio concurrently while tokens are pushed
-const audioConsumer = (async () => {
-  let i = 0;
-  for await (const chunk of stream.output) {
-    chunk.audio.save(`chunk-${i++}.wav`);
-  }
-})();
+let assets = TtsAssets::new("model.onnx", "tokenizer.json", "af_bella.bin");
+let mut tts = JabfyTts::create(&assets)?;
+let mut stream = tts.stream(TtsOptions::default());
 
 // Feed Ollama tokens as they arrive
-ollamaStream.on("token", (token) => stream.push(token));
-ollamaStream.on("end", () => stream.close());
+for token in ollama_tokens {
+    for chunk in stream.push(&token)? {
+        chunk.audio.save_to_wav(&format!("{}.wav", chunk.text))?;
+    }
+}
 
-await audioConsumer;
+// Flush whatever's left when the LLM stream ends
+for chunk in stream.close()? {
+    chunk.audio.save_to_wav(&format!("{}.wav", chunk.text))?;
+}
 ```
 
 ### Options
 
-| Option  | Type     | Default      | Description                                          |
-|---------|----------|--------------|------------------------------------------------------|
-| `voice` | `string` | `"af_heart"` | Kokoro voice ID                                      |
-| `dtype` | `string` | `"q8"`       | Model quantization: `fp32`, `fp16`, `q8`, `q4`, `q4f16` |
+| Option  | Type    | Default | Description                    |
+|---------|---------|---------|---------------------------------|
+| `speed` | `f32`   | `1.0`   | Playback speed multiplier      |
 
-Call `tts.listVoices()` to print all available voice IDs.
+Model-level knobs (`sample_rate`, `max_tokens_length`) are set via `TtsConfig` and `JabfyTts::with_config`.
 
 ## API
 
-### `JabfyTTS.create(options?)`
+### `JabfyTts::create(assets)`
 
-Loads the model and returns a `JabfyTTS` instance. Call once and reuse.
+Loads the model and a voice style with default config. Call once and reuse.
 
-### `tts.synthesize(text, options?)`
+### `JabfyTts::with_config(assets, config)`
 
-Generates audio for a complete string. Returns a kokoro-js audio object with `.save(path)`, `.data` (Float32Array), and `.sampling_rate`.
+Loads the model with explicit `TtsConfig` knobs (sample rate, max token length).
 
-### `tts.stream(options?)`
+### `tts.synthesize(text, options)`
 
-Returns a streaming handle:
+Generates audio for a complete string. Returns kokoroxide's `GeneratedAudio`, with `.save_to_wav(path)`, `.duration_seconds`, and `.sample_rate`.
 
-| Member   | Description                                                  |
-|----------|--------------------------------------------------------------|
-| `push`   | Feed a token into the stream                                 |
-| `flush`  | Emit audio for buffered text without closing the stream      |
-| `close`  | Signal end of input                                          |
-| `output` | Async iterable of `TTSStreamChunk`                           |
+### `tts.stream(options)`
 
-Each `TTSStreamChunk` contains `text`, `phonemes`, and `audio` (with `.save()`, `.data`, `.sampling_rate`).
+Returns a `TtsStream` with:
 
-### `tts.listVoices()`
+| Method  | Description                                                    |
+|---------|------------------------------------------------------------------|
+| `push`  | Feed a token into the stream; returns audio for completed sentences |
+| `flush` | Emit audio for buffered text without closing the stream          |
+| `close` | Flush remaining buffered text; call when input ends              |
 
-Prints all available Kokoro voice IDs to the console.
+Each returned `TtsStreamChunk` contains `text` and `audio` (`GeneratedAudio`).
 
 ## Publishing
 
-Creating a GitHub Release triggers the publish workflow automatically. The workflow builds the package and publishes it to GitHub Packages using `GITHUB_TOKEN`.
+Creating a GitHub Release triggers the publish workflow automatically. The workflow builds the crate and publishes it to crates.io using `CARGO_REGISTRY_TOKEN`.
 
 See the [wiki](../../wiki) for full documentation including the streaming guide, voice options, and troubleshooting.
+
