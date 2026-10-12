@@ -1,0 +1,24 @@
+[package]
+name = "jabfy-tts"
+version = "0.1.0"
+edition = "2021"
+description = "Kokoro TTS crate for jabfy-core — converts Ollama AI text output to speech"
+license = "MIT"
+keywords = ["tts", "kokoro", "speech", "ollama", "jabfy"]
+
+[lib]
+name = "jabfy_tts"
+path = "src/lib.rs"
+
+[dependencies]
+# crates.io release 0.1.5 pins ort = "1.16", and every 1.16.x release of ort
+# has since been yanked, making it un-buildable from a fresh lockfile. Use
+# this unmerged fork/branch which migrates to ort 2.0.0-rc.12 until upstream
+# (https://github.com/dhruv304c2/kokoroxide/pull/2) is merged and released.
+kokoroxide = { git = "https://github.com/janispauls/kokoroxide", branch = "ort_v2_migration" }
+# The fork's internal (non-test-gated) test module references ort's `coreml`
+# execution provider unconditionally; enabling the feature here unifies with
+# kokoroxide's `ort` dependency so it compiles. `lax-feature-matching` lets
+# ort-sys fall back to a prebuilt binary on platforms (e.g. Windows/Linux)
+# that don't ship a `coreml`-flavored build.
+ort = { version = "2.0.0-rc.13", features = ["coreml", "lax-feature-matching"] }
