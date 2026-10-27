@@ -98,5 +98,16 @@ Each returned `TtsStreamChunk` contains `text` and `audio` (`GeneratedAudio`).
 
 Creating a GitHub Release triggers the publish workflow automatically. The workflow builds the crate and publishes it to crates.io using `CARGO_REGISTRY_TOKEN`.
 
-See the [wiki](../../wiki) for full documentation including the streaming guide, voice options, and troubleshooting.
+## Documentation
+
+| Page | Contenu |
+|---|---|
+| [docs/README.md](docs/README.md) | Rôle dans l'architecture, état actuel et TODO |
+| [docs/installation.md](docs/installation.md) | Prérequis, espeak-ng, assets du modèle, installation, publication |
+| [docs/fonctionnement.md](docs/fonctionnement.md) | Fonctionnement interne, streaming, choix d'implémentation |
+| [docs/interfaces.md](docs/interfaces.md) | API publique : `JabfyTts`, `TtsStream`, types et ré-exports |
+| [docs/voix.md](docs/voix.md) | Fichiers de voix et convention de nommage |
+| [docs/depannage.md](docs/depannage.md) | Erreurs de build, de liaison, de synthèse et de streaming |
+| [docs/tests.md](docs/tests.md) | Vérifications, CI et publication |
+| [docs/code/README.md](docs/code/README.md) | Documentation du code, fichier par fichier |
 
