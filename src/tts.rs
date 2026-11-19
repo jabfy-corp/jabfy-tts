@@ -45,9 +45,8 @@ impl JabfyTts {
         text: &str,
         options: TtsOptions,
     ) -> Result<GeneratedAudio, Box<dyn std::error::Error>> {
-        Ok(self
-            .engine
-            .generate_speech(text, &self.voice, options.speed)?)
+        self.engine
+            .generate_speech(text, &self.voice, options.speed)
     }
 
     /// Start a streaming session — feed tokens as they arrive and get back
