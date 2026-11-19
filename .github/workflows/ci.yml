@@ -15,8 +15,8 @@ jobs:
         with:
           components: rustfmt, clippy
 
-      - name: Install espeak-ng
-        run: sudo apt-get update && sudo apt-get install -y espeak-ng libespeak-ng-dev
+      - name: Install espeak-ng and ALSA dev libs
+        run: sudo apt-get update && sudo apt-get install -y espeak-ng libespeak-ng-dev libasound2-dev pkg-config
 
       - uses: Swatinem/rust-cache@v2
 
@@ -35,8 +35,8 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
 
-      - name: Install espeak-ng
-        run: sudo apt-get update && sudo apt-get install -y espeak-ng libespeak-ng-dev
+      - name: Install espeak-ng and ALSA dev libs
+        run: sudo apt-get update && sudo apt-get install -y espeak-ng libespeak-ng-dev libasound2-dev pkg-config
 
       - uses: Swatinem/rust-cache@v2
 
