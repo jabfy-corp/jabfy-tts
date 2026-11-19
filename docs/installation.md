@@ -4,13 +4,14 @@
 
 - Une toolchain Rust stable (`rustup`)
 - `espeak-ng` — utilisé par kokoroxide pour la conversion texte → phonèmes
+- Sur Linux : `libasound2-dev` et `pkg-config` — la lecture audio passe par rodio/cpal, dont `alsa-sys` requiert les en-têtes ALSA
 - Les assets du modèle Kokoro, téléchargés à part (rien n'est embarqué dans la crate)
 
 ## Installer espeak-ng
 
 | Plateforme | Commande |
 |---|---|
-| Ubuntu/Debian | `sudo apt-get install espeak-ng libespeak-ng-dev` |
+| Ubuntu/Debian | `sudo apt-get install espeak-ng libespeak-ng-dev libasound2-dev pkg-config` |
 | macOS | `brew install espeak-ng` |
 | Windows | `winget install eSpeak-NG.eSpeak-NG` |
 

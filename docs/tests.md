@@ -31,7 +31,7 @@ Le workflow `.github/workflows/ci.yml` tourne à chaque pull request vers `main`
 1. `quality` : `cargo fmt --check` puis `cargo clippy --all-targets -- -D warnings` ;
 2. `build` : `cargo build --release` (ne tourne que si `quality` passe).
 
-Les deux installent `espeak-ng` et `libespeak-ng-dev` via apt avant de compiler.
+Les deux installent `espeak-ng`, `libespeak-ng-dev`, `libasound2-dev` et `pkg-config` via apt avant de compiler.
 
 ## Publication
 

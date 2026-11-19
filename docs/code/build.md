@@ -6,7 +6,10 @@
 | `Cargo.lock` | Lockfile : fige le fork de kokoroxide et tout l'arbre `ort`. |
 | `.cargo/config.toml` | `-L vendor/espeak-ng` dans les rustflags MSVC Windows : ajoute la bibliothèque d'import au chemin du linker. |
 | `vendor/espeak-ng/espeak-ng.lib` | Bibliothèque d'import générée depuis les exports de `libespeak-ng.dll` (`dumpbin` + `lib.exe`), absente de l'installeur Windows officiel. |
-| `.github/workflows/ci.yml` | Sur PR vers `main` : `cargo fmt --check` et `clippy -D warnings` (job `quality`), puis `cargo build --release` (job `build`), Ubuntu + espeak-ng. |
+| `.github/workflows/ci.yml` | Sur PR vers `main` : `cargo fmt --check` et `clippy -D warnings` (job `quality`), puis `cargo build --release` (job `build`), Ubuntu + espeak-ng + `libasound2-dev` (rodio/cpal → `alsa-sys`). |
 | `.github/workflows/publish.yml` | Sur release GitHub : build release puis `cargo publish --token CARGO_REGISTRY_TOKEN` vers crates.io. |
+| `.github/workflows/pr-validation.yml` | Sur PR : vérifie qu'au moins une issue est liée via un mot-clé de clôture (`Closes #123`), sinon la PR échoue. |
+| `.github/workflows/issue-labeler.yml` | Sur ouverture/édition d'issue : applique des labels à partir des cases cochées dans le corps de l'issue. |
+| `.github/workflows/notify-docs.yml` | Sur push vers `main` touchant `docs/` : envoie un événement `docs-updated` à jabfy-docs pour resynchroniser la doc (nécessite le secret `DOCS_DISPATCH_TOKEN`). |
 
 À noter : `cargo publish` refuse les dépendances git sans champ `version` — la publication crates.io est donc bloquée tant que le fork de kokoroxide reste une dépendance git. Retour prévu à la version crates.io après le merge de la PR upstream (voir [limites connues](../README.md)).

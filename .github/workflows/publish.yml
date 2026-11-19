@@ -1,4 +1,4 @@
-name: Publish to GitHub Packages
+name: Publish to crates.io
 
 on:
   release:
@@ -15,8 +15,10 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
 
-      - name: Install espeak-ng
-        run: sudo apt-get update && sudo apt-get install -y espeak-ng libespeak-ng-dev
+      - name: Install espeak-ng and ALSA dev libs
+        run: sudo apt-get update && sudo apt-get install -y espeak-ng libespeak-ng-dev libasound2-dev pkg-config
+
+      - uses: Swatinem/rust-cache@v2
 
       - run: cargo build --release
       - run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
